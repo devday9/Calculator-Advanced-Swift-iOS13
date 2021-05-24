@@ -12,6 +12,18 @@ class ViewController: UIViewController {
     
     //MARK: - Properties
     private var isFinishedTypingNumber: Bool = true
+    private var calculator = CalculatorLogic()
+    private var displayValue: Double {
+        get {
+            guard let number = Double(displayLabel.text!) else {
+                fatalError("Cannot convert display labe text to a Double.")
+            }
+            return number
+        }
+        set {
+            displayLabel.text = String(newValue)
+        }
+    }
     
     //MARK: - Outlets
     @IBOutlet weak var displayLabel: UILabel!
@@ -26,56 +38,39 @@ class ViewController: UIViewController {
         
         isFinishedTypingNumber = true
         
-        guard let number = Double(displayLabel.text!) else {
-            fatalError("Cannot convert display labe text to a Double.")
-        }
+        calculator.setNumber(displayValue)
         
         if let calcMethod = sender.currentTitle {
-            if calcMethod == "+/-" {
-                displayLabel.text = String(number * -1)
-            } else if calcMethod == "AC" {
-                displayLabel.text = "0"
-            } else if calcMethod == "%" {
-                displayLabel.text = String(number * 0.01)
+            
+            if let result = calculator.calculate(symbol: calcMethod) {
+                displayValue = result
             }
         }
     }
+    
+    @IBAction func numButtonPressed(_ sender: UIButton) {
         
-        @IBAction func numButtonPressed(_ sender: UIButton) {
+        if let numValue =  sender.currentTitle {
             
-            if let numValue =  sender.currentTitle {
+            if isFinishedTypingNumber {
+                displayLabel.text = numValue
+                isFinishedTypingNumber = false
+            } else {
                 
-                if isFinishedTypingNumber {
-                    displayLabel.text = numValue
-                    isFinishedTypingNumber = false
-                } else {
+                if numValue == "." {
                     
-                    if numValue == "." {
-                        
-                        guard let currentDisplayValue = Double(displayLabel.text!) else {
-                            fatalError("Cannot convert display label to Double!")
-                        }
-                        
-                        let isInt = floor(currentDisplayValue) == currentDisplayValue
-                        
-                        if !isInt {
-                            return
-                        }
+                    guard let currentDisplayValue = Double(displayLabel.text!)
+                    else {fatalError("Cannot convert display label to Double!")}
+                    
+                    let isInt = floor(displayValue) == displayValue
+                    
+                    if !isInt {
+                        return
                     }
-                    
-                    displayLabel.text = displayLabel.text! + numValue
                 }
+                displayLabel.text = displayLabel.text! + numValue
             }
         }
-        
-        //MARK: - Helper Functions
-        func numberPressed(button: UIButton) {
-            
-            
-        }
-        
-        func calcPressed() {
-            
-        }
+    }
 }//END OF CLASS
 
